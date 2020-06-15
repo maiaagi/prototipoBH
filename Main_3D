@@ -1,0 +1,100 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue May  5 17:34:47 2020
+
+@author: Maia
+
+En esta versión intentamos optimizar el algoritmo:
+    - No llamamos a la funcion clean()
+
+"""
+
+from functions_3D_v3 import Tree_Renewer
+#from functions_3D_v3 import p2o # Si P no es leido de un fichero descomentar
+from functions_3D_v3 import new_velocity_and_position
+from functions_3D_v3 import IvsSize
+from functions_3D_v3 import BH
+from functions_3D_v3 import P_builder
+
+from save_P1 import P
+from save_P1 import A
+#from random import randint
+from collections import OrderedDict
+#import matplotlib.pyplot as plt
+import json
+
+class tree(OrderedDict):
+    """Autovivified dictionary."""
+         
+    def __missing__(self, key):
+        value = self[key] = type(self)()
+        return value
+
+
+N = len(P) 
+#A = 15  # Si P no es leido de un fichero descomentar
+theta = 0.6
+zmax = ymax = xmax = 2**A - 1
+count = N
+
+#P = OrderedDict() # Si P no es leido de un fichero descomentar
+P2 = OrderedDict() 
+T = tree()
+Q = tree()
+L = {}
+
+
+#P[0] = {'X':500,'Y':500,'Z':500,'VX':0,'VY':0,'VZ':0,'M':10,'cell':'0' + p2o(500,500,500,A),'S':1,'I':0,'ancs':[0],'nodes':[0]}
+#P[1] = {'X':490,'Y':500,'Z':500,'VX':40,'VY':50,'VZ':40,'M':10,'cell':'0' + p2o(490,500,500,A),'S':1,'I':1,'ancs':[1],'nodes':[1]}
+
+# Si hay dos cuerpos en la misma celda en la posicion inicial (altamente improbable) nos quedaremos con el ultimo
+# las combinaciones las haremos a partir de aqui, vienen dadas por choques inelasticos
+
+T,P = Tree_Renewer(P,N,A)
+
+I_max = max(map(int,P.keys()))
+L[I_max] = 2**(A-T[I_max]["level"])
+           
+IvsSize(T,I_max,L,A)
+
+for w in range (10): # Numero de veces que iteramos el sistema, t = w*tau
+        
+    position = []
+    cells = {} 
+    
+    for j in range (N):
+                
+        F,cff = BH(T,I_max,j,[0,0,0],P,L,N,theta)
+        
+        if (j == 0):
+            print("j=",j,"F=",F)
+
+        v,r = new_velocity_and_position(j,F,xmax,P)
+        
+        position.append(r)
+                
+        m = P[str(j)]["M"]
+        P2,count,cells = P_builder(j,v,r,m,A,P2,count,cells)
+
+    P = OrderedDict()
+    N = count
+    T, P = Tree_Renewer(P2,N,A)
+    P2 = OrderedDict()
+    
+    L = {}
+    I_max = max(map(int,P.keys()))
+    L[I_max] = 2**(A-T[I_max]["level"])
+    IvsSize(T,I_max,L,A)
+
+#print("Hemos calculado la fuerza:",len(cff),"veces")
+
+    # PLOTEAR:
+    #plt.scatter(*zip(*position))
+    #plt.xlim(0,1000)
+    #plt.ylim(0,1000)
+    #plt.show()
+    #plt.savefig("position"+str(w)+".png")
+ 
+# Guardamos T en save_T.py para dibujar esquema
+with open("save_T.py", "w") as fh:
+   fh.write('T = ' + json.dumps(T, indent = 6))
