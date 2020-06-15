@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 27 12:08:31 2020
+
+@author: Maia
+"""
+from random import randint
+from collections import OrderedDict
+from functions_3D_v1 import p2o
+from functions_2D_v6 import p2q
+import json
+
+N = 100
+A = 10
+zmax = ymax = xmax = 2**A - 1
+
+P1 = OrderedDict() #BH 3D
+P2 = OrderedDict() #SD 3D
+P3 = OrderedDict() #BH 2D
+P4 = OrderedDict() #SD 2D
+
+for n in range(N):
+    X = randint(0,xmax)
+    Y = randint(0,ymax)
+    Z = randint(0,zmax)
+    VX = randint(-10,10)
+    VY = randint(-10,10)
+    VZ = randint(-10,10)
+    M = 10*randint(1,1000)
+    P1[n] = {'X':X,'Y':Y,'Z':Z,'VX':VX,'VY':VY,'VZ':VZ,'M':M,'cell':'0' + p2o(X,Y,Z,A),'S':1,'I':n,'ancs':[n],'nodes':[n]}
+    P3[n] = {'X':X,'Y':Y,'VX':VX,'VY':VY,'M':M,'cell':'0' + p2q(X,Y,A),'S':1,'I':n,'ancs':[n],'nodes':[n]}
+    P2[n] = {'X':X,'Y':Y,'Z':Z,'VX':VX,'VY':VY,'VZ':VZ,'M':M }
+    P4[n] = {'X':X,'Y':Y,'VX':VX,'VY':VY,'M':M }
+
+with open("save_P1.py", "w") as fh:
+   fh.write('A = ' + str(A) + '\n')
+   fh.write('P = ' + json.dumps(P1, indent = 6))
+   
+with open("save_P2.py", "w") as fh:
+   fh.write('A = ' + str(A) + '\n')
+   fh.write('P = ' + json.dumps(P2, indent = 6))
+   
+with open("save_P3.py", "w") as fh:
+   fh.write('A = ' + str(A) + '\n')
+   fh.write('P = ' + json.dumps(P3, indent = 6))
+   
+with open("save_P4.py", "w") as fh:
+   fh.write('A = ' + str(A) + '\n')
+   fh.write('P = ' + json.dumps(P4, indent = 6))
