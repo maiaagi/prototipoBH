@@ -292,13 +292,16 @@ def new_velocity_and_position(a,F,xmax,P):
                     
         v[i] = v[i] + F[i]*tau
         
-        #r[i] = int(r[i] + v[i]*tau)%xmax # espacio toroidal, discontinuidad en F
-        
         r[i] = round(r[i] + v[i]*tau)
         
-        if (r[i] == xmax or r[i] == 0):
+        if (r[i] >= xmax):
             v[i] = -v[i]
-    
+            r[i] = xmax
+        
+        elif (r[i] <= 0):
+            v[i] = -v[i]
+            r[i] = 0
+                       
     # hacer rebotar, cambio signo v  
     return v,r
 
