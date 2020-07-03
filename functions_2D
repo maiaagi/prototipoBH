@@ -285,8 +285,13 @@ def new_velocity_and_position(a,F,xmax,P):
         
         r[i] = round(r[i] + v[i]*tau)
         
-        if (r[i] == xmax or r[i] == 0):
+        if (r[i] >= xmax):
             v[i] = -v[i]
+            r[i] = xmax
+        
+        elif (r[i] <= 0):
+            v[i] = -v[i]
+            r[i] = 0
         
     return v,r
 
